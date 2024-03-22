@@ -13,9 +13,11 @@ static TimerHandle_t blinkTmr;
 static void blinkCallBack( TimerHandle_t timer );
 // Comentei porque estava usando antes, mas agora criei uma task --> static void retornoLed2( TimerHandle_t timer );
 void vTaskRetornoLed2(void *pvParameters); // Task
-void lerBotao(void *pvParameters); // Task para o botao
+void lerBotaoLed(void *pvParameters); // Task para o botao
+
 TaskHandle_t xTaskHandleBotao;
 
+void mensagemKeys(void *pvParameters); // Task para os botoes que exibirao uma mensagem
 //================================================================================
 
 int main( void ){
@@ -73,13 +75,12 @@ int main( void ){
 		xTaskCreate(vTaskRetornoLed2, "RetornoLed2_Task", configMINIMAL_STACK_SIZE, NULL, 1, &xTaskHandleBotao);
 
 		// Task para ler o botao
-		xTaskCreate(lerBotao, "lerBotao", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
+		xTaskCreate(lerBotaoLed, "lerBotaoLed", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
 
+		xTaskCreate(mensagemKeys, "mensagemKeys", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 		
     vTaskStartScheduler();
 }
-
-
 //================================================================================
 
 static void blinkCallBack( TimerHandle_t timer ){
@@ -101,8 +102,7 @@ static void blinkCallBack( TimerHandle_t timer ){
     }
 }
 	
-
-	void lerBotao(void *pvParameters){
+	void lerBotaoLed(void *pvParameters){
 		while(1){
 		 if (!(GPIO_ReadValue(botao_PORT) & (1 << botao_BIT)))
 						vTaskSuspend(xTaskHandleBotao);
@@ -110,8 +110,24 @@ static void blinkCallBack( TimerHandle_t timer ){
 		}
 				        vTaskDelay(pdMS_TO_TICKS(200));
 	} 
+	
+	void mensagemKeys(void *pvParameters){
+		const char * mensagem1 = "\n Botao 1 do rafa \r\n";
+		const char * mensagem2 = "\n O Rafael Zanella eh lindo \r\n";
 
-
+		while(1){
+			 if (!(GPIO_ReadValue(botao_1_PORT) & (1 << botao_1_BIT))){
+				 
+				 UART_Send(LPC_UART0, (uint8_t *)mensagem1, strlen(mensagem1), BLOCKING);
+				 vTaskDelay(pdMS_TO_TICKS(200));
+				 
+		  } else if(!(GPIO_ReadValue(botao_2_PORT) & (1 << botao_2_BIT))){
+				
+				 UART_Send(LPC_UART0, (uint8_t *)mensagem2, strlen(mensagem2), BLOCKING);
+				 vTaskDelay(pdMS_TO_TICKS(200));
+			}
+		}
+	}
 //================================================================================
 /*No momento não está sendo usada, pois o kernel está sendo compilado
 sem a opção configASSERT */

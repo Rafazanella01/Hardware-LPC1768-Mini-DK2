@@ -25,6 +25,15 @@ extern uint8_t contactCycle;
 #define botao_PORT 2
 #define botao_BIT 10
 
+#define botao_1_PORT 2
+#define botao_1_BIT 11
+
+#define botao_2_PORT 2
+#define botao_2_BIT 12
+
+
+
+
 
 
 
