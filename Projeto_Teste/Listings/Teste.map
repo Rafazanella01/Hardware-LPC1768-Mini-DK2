@@ -1407,12 +1407,12 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-       428         84          0          8          0      69191   main.o
-        52         18        204          0        512        772   startup_mps_cm3.o
-       636         38          0          4          0       1219   system_lpc17xx.o
+       428         84          0          8          0      69607   main.o
+        52         18        204          0        512        804   startup_mps_cm3.o
+       636         38          0          4          0       1319   system_lpc17xx.o
 
     ----------------------------------------------------------------------
-      1116        140        252         12        512      71182   Object Totals
+      1116        140        252         12        512      71730   Object Totals
          0          0         48          0          0          0   (incl. Generated)
          0          0          0          0          0          0   (incl. Padding)
 
@@ -1481,8 +1481,8 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      9460        726        252        128      35448     224233   Grand Totals
-      9460        726        252        128      35448     224233   ELF Image Totals
+      9460        726        252        128      35448     224781   Grand Totals
+      9460        726        252        128      35448     224781   ELF Image Totals
       9460        726        252        128          0          0   ROM Totals
 
 ==============================================================================
