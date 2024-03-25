@@ -96,7 +96,7 @@ static void blinkCallBack( TimerHandle_t timer ){
 	
 }
 
-	void vTaskRetornoLed2(void *pvParameters) { 
+void vTaskRetornoLed2(void *pvParameters) { 
     while (1) {
         if (GPIO_ReadValue(led2_PORT) & (1 << led2_BIT))
             GPIO_ClearValue(led2_PORT, 1 << led2_BIT);
@@ -107,7 +107,7 @@ static void blinkCallBack( TimerHandle_t timer ){
     }
 }
 	
-	void lerBotaoLed(void *pvParameters){
+void lerBotaoLed(void *pvParameters){
 		while(1){
 		 if (!(GPIO_ReadValue(botao_PORT) & (1 << botao_BIT)))
 						vTaskSuspend(xTaskHandleBotao);
@@ -116,7 +116,7 @@ static void blinkCallBack( TimerHandle_t timer ){
 				        vTaskDelay(pdMS_TO_TICKS(200));
 	} 
 	
-	void mensagemKeys(void *pvParameters){
+void mensagemKeys(void *pvParameters){
 		const char * mensagem1 = "\n Botao 1 do rafa \r\n";
 		const char * mensagem2 = "\n O Rafael Zanella eh lindo \r\n";
 		char mensagem[tamanho];
@@ -134,10 +134,10 @@ static void blinkCallBack( TimerHandle_t timer ){
 				 xQueueSend(xMessageQueue, mensagem2, 0);
 				 vTaskDelay(pdMS_TO_TICKS(200));
 			}
-			        if (xQueueReceive(xMessageQueue, mensagem, 0) == pdPASS) {
+			      if (xQueueReceive(xMessageQueue, mensagem, 0) == pdPASS) {
              UART_Send(LPC_UART0, (uint8_t *)mensagem, strlen(mensagem), BLOCKING);
 						 vTaskDelay(pdMS_TO_TICKS(200));
-        }
+						}
 		}
 	}
 //================================================================================
