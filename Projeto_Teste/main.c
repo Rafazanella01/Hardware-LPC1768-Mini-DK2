@@ -5,17 +5,21 @@
 #include <stdio.h>
 #include <task.h>
 
+#define tamanho 50
+
 static TimerHandle_t blinkTmr;
 
 //================================================================================
 //Protótipos de funções
 
 static void blinkCallBack( TimerHandle_t timer );
-// Comentei porque estava usando antes, mas agora criei uma task --> static void retornoLed2( TimerHandle_t timer );
 void vTaskRetornoLed2(void *pvParameters); // Task
 void lerBotaoLed(void *pvParameters); // Task para o botao
 
+// handle para suspender o led que for passado a handle
 TaskHandle_t xTaskHandleBotao;
+
+QueueHandle_t xMessageQueue;
 
 void mensagemKeys(void *pvParameters); // Task para os botoes que exibirao uma mensagem
 //================================================================================
@@ -69,16 +73,17 @@ int main( void ){
 		blinkTmr= xTimerCreate( "blinkTmr", pdMS_TO_TICKS(100), pdTRUE, 0, blinkCallBack);		
     xTimerStart( blinkTmr, 0 );   
 		
-		//TaskHandle_t xTaskHandleBotao;
-
 		// Task para o 2° LED
 		xTaskCreate(vTaskRetornoLed2, "RetornoLed2_Task", configMINIMAL_STACK_SIZE, NULL, 1, &xTaskHandleBotao);
 
 		// Task para ler o botao
 		xTaskCreate(lerBotaoLed, "lerBotaoLed", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
 
+		// Imprime as mensagens seriais
 		xTaskCreate(mensagemKeys, "mensagemKeys", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 		
+		xMessageQueue = xQueueCreate(50, sizeof(char[tamanho]));
+
     vTaskStartScheduler();
 }
 //================================================================================
@@ -114,18 +119,25 @@ static void blinkCallBack( TimerHandle_t timer ){
 	void mensagemKeys(void *pvParameters){
 		const char * mensagem1 = "\n Botao 1 do rafa \r\n";
 		const char * mensagem2 = "\n O Rafael Zanella eh lindo \r\n";
-
+		char mensagem[tamanho];
+		
 		while(1){
 			 if (!(GPIO_ReadValue(botao_1_PORT) & (1 << botao_1_BIT))){
 				 
-				 UART_Send(LPC_UART0, (uint8_t *)mensagem1, strlen(mensagem1), BLOCKING);
+				// UART_Send(LPC_UART0, (uint8_t *)mensagem1, strlen(mensagem1), BLOCKING);
+				 xQueueSend(xMessageQueue, mensagem1, 0);
 				 vTaskDelay(pdMS_TO_TICKS(200));
 				 
 		  } else if(!(GPIO_ReadValue(botao_2_PORT) & (1 << botao_2_BIT))){
 				
-				 UART_Send(LPC_UART0, (uint8_t *)mensagem2, strlen(mensagem2), BLOCKING);
+				 //UART_Send(LPC_UART0, (uint8_t *)mensagem2, strlen(mensagem2), BLOCKING);
+				 xQueueSend(xMessageQueue, mensagem2, 0);
 				 vTaskDelay(pdMS_TO_TICKS(200));
 			}
+			        if (xQueueReceive(xMessageQueue, mensagem, 0) == pdPASS) {
+             UART_Send(LPC_UART0, (uint8_t *)mensagem, strlen(mensagem), BLOCKING);
+						 vTaskDelay(pdMS_TO_TICKS(200));
+        }
 		}
 	}
 //================================================================================
