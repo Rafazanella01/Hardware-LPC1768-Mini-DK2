@@ -15,7 +15,7 @@ static TimerHandle_t blinkTmr;
 static void blinkCallBack( TimerHandle_t timer );
 void vTaskRetornoLed2(void *pvParameters); // Task
 void lerBotaoLed(void *pvParameters); // Task para o botao
-void recebeFila(void *pvParameters);
+void recebeFila(void *pvParameters); // Task para receber o que foi enviado pra fila
 
 // handle para suspender o led que for passado a handle
 TaskHandle_t xTaskHandleBotao;
@@ -80,10 +80,11 @@ int main( void ){
 		// Task para ler o botao
 		xTaskCreate(lerBotaoLed, "lerBotaoLed", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
 
-		// Imprime as mensagens seriais
+		// Faz a leitura das mensagens e envia para a fila
 		xTaskCreate(mensagemKeys, "mensagemKeys", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 		
-		xTaskCreate(recebeFila, "recebeFila", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+		// Recebe as mensagens da fila e imprime na tela
+		xTaskCreate(recebeFila, "recebeFila", configMINIMAL_STACK_SIZE, NULL,/*tskIDLE_PRIORITY*/ 2, NULL);
 		
 		xMessageQueue = xQueueCreate(50, sizeof(char[tamanho]));
 
@@ -115,9 +116,9 @@ void lerBotaoLed(void *pvParameters){
 		 if (!(GPIO_ReadValue(botao_PORT) & (1 << botao_BIT)))
 						vTaskSuspend(xTaskHandleBotao);
 						//vTaskResume(xTaskHandleBotao);
-		}
+		 }
 				        vTaskDelay(pdMS_TO_TICKS(200));
-	} 
+} 
 	
 void mensagemKeys(void *pvParameters){
 		const char * mensagem1 = "\n Botao 1 do rafa \r\n";
@@ -130,23 +131,24 @@ void mensagemKeys(void *pvParameters){
 				 xQueueSend(xMessageQueue, mensagem1, 0);
 				 vTaskDelay(pdMS_TO_TICKS(200));
 				 
-		  } else if(!(GPIO_ReadValue(botao_2_PORT) & (1 << botao_2_BIT))){
+				}else if(!(GPIO_ReadValue(botao_2_PORT) & (1 << botao_2_BIT))){
 				
 				 //UART_Send(LPC_UART0, (uint8_t *)mensagem2, strlen(mensagem2), BLOCKING);
 				 xQueueSend(xMessageQueue, mensagem2, 0);
 				 vTaskDelay(pdMS_TO_TICKS(200));
+				}
+		}
+}
+
+void recebeFila(void *pvParameters){
+	char mensagem[tamanho];
+		while(1){		
+			if (xQueueReceive(xMessageQueue, mensagem, portMAX_DELAY) == pdPASS) {
+          UART_Send(LPC_UART0, (uint8_t *)mensagem, strlen(mensagem), BLOCKING);
+					vTaskDelay(pdMS_TO_TICKS(200));
 			}
 		}
-	}
-
-	void recebeFila(void *pvParameters){
-			char mensagem[tamanho];
-		
-		if (xQueueReceive(xMessageQueue, mensagem, 0) == pdPASS) {
-             UART_Send(LPC_UART0, (uint8_t *)mensagem, strlen(mensagem), BLOCKING);
-						 vTaskDelay(pdMS_TO_TICKS(200));
-		}
-	}
+}
 
 	
 //================================================================================

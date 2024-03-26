@@ -1192,7 +1192,7 @@ Image Symbol Table
     mensagemKeys                             0x00001081   Thumb Code    74  main.o(i.mensagemKeys)
     pvPortMalloc                             0x00001689   Thumb Code   318  heap_4.o(i.pvPortMalloc)
     pxPortInitialiseStack                    0x000017d5   Thumb Code    30  port.o(i.pxPortInitialiseStack)
-    recebeFila                               0x000017f9   Thumb Code    52  main.o(i.recebeFila)
+    recebeFila                               0x000017f9   Thumb Code    50  main.o(i.recebeFila)
     uxListRemove                             0x00001835   Thumb Code    38  list.o(i.uxListRemove)
     vApplicationGetIdleTaskMemory            0x0000185d   Thumb Code    16  freertosappstaticalloc.o(i.vApplicationGetIdleTaskMemory)
     vApplicationGetTimerTaskMemory           0x00001871   Thumb Code    16  freertosappstaticalloc.o(i.vApplicationGetTimerTaskMemory)
@@ -1435,12 +1435,12 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-       720        196          0         12          0      73204   main.o
+       720        198          0         12          0      73160   main.o
         52         18        204          0        512        804   startup_mps_cm3.o
        636         38          0          4          0       1319   system_lpc17xx.o
 
     ----------------------------------------------------------------------
-      1408        252        252         16        512      75327   Object Totals
+      1408        254        252         16        512      75283   Object Totals
          0          0         48          0          0          0   (incl. Generated)
          0          0          0          0          0          0   (incl. Padding)
 
@@ -1510,9 +1510,9 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     10192        852        252        132      35452     230134   Grand Totals
-     10192        852        252        132      35452     230134   ELF Image Totals
-     10192        852        252        132          0          0   ROM Totals
+     10192        854        252        132      35452     230090   Grand Totals
+     10192        854        252        132      35452     230090   ELF Image Totals
+     10192        854        252        132          0          0   ROM Totals
 
 ==============================================================================
 
