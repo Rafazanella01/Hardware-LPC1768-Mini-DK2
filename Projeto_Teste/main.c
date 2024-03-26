@@ -15,6 +15,7 @@ static TimerHandle_t blinkTmr;
 static void blinkCallBack( TimerHandle_t timer );
 void vTaskRetornoLed2(void *pvParameters); // Task
 void lerBotaoLed(void *pvParameters); // Task para o botao
+void recebeFila(void *pvParameters);
 
 // handle para suspender o led que for passado a handle
 TaskHandle_t xTaskHandleBotao;
@@ -82,6 +83,8 @@ int main( void ){
 		// Imprime as mensagens seriais
 		xTaskCreate(mensagemKeys, "mensagemKeys", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 		
+		xTaskCreate(recebeFila, "recebeFila", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+		
 		xMessageQueue = xQueueCreate(50, sizeof(char[tamanho]));
 
     vTaskStartScheduler();
@@ -119,7 +122,6 @@ void lerBotaoLed(void *pvParameters){
 void mensagemKeys(void *pvParameters){
 		const char * mensagem1 = "\n Botao 1 do rafa \r\n";
 		const char * mensagem2 = "\n O Rafael Zanella eh lindo \r\n";
-		char mensagem[tamanho];
 		
 		while(1){
 			 if (!(GPIO_ReadValue(botao_1_PORT) & (1 << botao_1_BIT))){
@@ -134,12 +136,19 @@ void mensagemKeys(void *pvParameters){
 				 xQueueSend(xMessageQueue, mensagem2, 0);
 				 vTaskDelay(pdMS_TO_TICKS(200));
 			}
-			      if (xQueueReceive(xMessageQueue, mensagem, 0) == pdPASS) {
-             UART_Send(LPC_UART0, (uint8_t *)mensagem, strlen(mensagem), BLOCKING);
-						 vTaskDelay(pdMS_TO_TICKS(200));
-						}
 		}
 	}
+
+	void recebeFila(void *pvParameters){
+			char mensagem[tamanho];
+		
+		if (xQueueReceive(xMessageQueue, mensagem, 0) == pdPASS) {
+             UART_Send(LPC_UART0, (uint8_t *)mensagem, strlen(mensagem), BLOCKING);
+						 vTaskDelay(pdMS_TO_TICKS(200));
+		}
+	}
+
+	
 //================================================================================
 /*No momento não está sendo usada, pois o kernel está sendo compilado
 sem a opção configASSERT */
