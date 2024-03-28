@@ -13,6 +13,8 @@ static TaskHandle_t xTask;
 
 static SemaphoreHandle_t mutexADC;
 
+static SemaphoreHandle_t Potenciometro;
+
 //================================================================================
 //Protótipos de funções
 static void blinkCallBack( TimerHandle_t timer );
@@ -106,6 +108,8 @@ int main( void ){
 		
 		// Cria o mutex que vai ser feito o take na função leCanalAD
 		mutexADC = xSemaphoreCreateMutex();
+		
+		Potenciometro = xSemaphoreCreateMutex();
 						
 		// timer do 1° LED
 		blinkTmr= xTimerCreate( "blinkTmr", pdMS_TO_TICKS(100), pdTRUE, 0, blinkCallBack);		
@@ -257,22 +261,22 @@ void potenciometro(void *pvParameters){
 	 char buffer[20];
     while (1) {
         // Obtém o mutex para acesso ao ADC
-        // xSemaphoreTake(mutexADC, 0);
+         xSemaphoreTake(Potenciometro, 0);
         
         // Lê o valor do potenciômetro
         uint16_t valor = leCanalAD(3);
         
-        // Libera o mutex após a leitura
-        //xSemaphoreGive(mutexADC);
         
         // Converte o valor lido para string
         sprintf(buffer, "%u\r\n", valor);
         
         // Envia o valor via UART
         UART_Send(LPC_UART0, (uint8_t *)buffer, strlen(buffer), BLOCKING);
-        
+                			
         // Aguarda um tempo antes de realizar a próxima leitura
         vTaskDelay(pdMS_TO_TICKS(10)); 
+			
+				xSemaphoreGive(Potenciometro);
     }
 }
 	
