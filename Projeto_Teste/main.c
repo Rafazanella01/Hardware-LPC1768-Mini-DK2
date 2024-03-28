@@ -254,12 +254,25 @@ void recebeEnviaSerial(void *pvParameters){
 }
 
 void potenciometro(void *pvParameters){
-	while (1) {
+	 char buffer[20];
+    while (1) {
+        // Obtém o mutex para acesso ao ADC
+        // xSemaphoreTake(mutexADC, 0);
+        
+        // Lê o valor do potenciômetro
         uint16_t valor = leCanalAD(3);
-        char buffer[20]; 
-        sprintf(buffer, "%u", valor); // Converte o valor lido para string
-        UART_Send(LPC_UART0, (uint8_t *)buffer, strlen(buffer), BLOCKING); 
-        vTaskDelay(pdMS_TO_TICKS(200));
+        
+        // Libera o mutex após a leitura
+        //xSemaphoreGive(mutexADC);
+        
+        // Converte o valor lido para string
+        sprintf(buffer, "%u\r\n", valor);
+        
+        // Envia o valor via UART
+        UART_Send(LPC_UART0, (uint8_t *)buffer, strlen(buffer), BLOCKING);
+        
+        // Aguarda um tempo antes de realizar a próxima leitura
+        vTaskDelay(pdMS_TO_TICKS(10)); 
     }
 }
 	
