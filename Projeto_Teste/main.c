@@ -39,6 +39,7 @@ uint16_t leCanalAD( unsigned char canal );
 // task pro potenciometro
 void potenciometro(void *pvParameters);
 
+void mensagemUART(char msg[]);
 //================================================================================
 
 int main( void ){
@@ -119,10 +120,10 @@ int main( void ){
 		xTaskCreate(vTaskRetornoLed2, "RetornoLed2_Task", configMINIMAL_STACK_SIZE, NULL, 1, &xTaskHandleBotao);
 
 		// Task para ler o botao que apaga o led
-		xTaskCreate(lerBotaoLed, "lerBotaoLed", configMINIMAL_STACK_SIZE, NULL, /*tskIDLE_PRIORITY +*/ 1, NULL);
+		xTaskCreate(lerBotaoLed, "lerBotaoLed", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 
 		// Faz a leitura dos botões e envia um sinal para a função recebeEnviaSerial
-		xTaskCreate(leBotoesMensagens, "leBotoesMensagens", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+		xTaskCreate(leBotoesMensagens, "leBotoesMensagens", 40, NULL, 1, NULL);
 		
 		// Recebe as mensagens da fila e imprime na tela
 		xTaskCreate(recebeEnviaSerial, "recebeEnviaSerial", configMINIMAL_STACK_SIZE, NULL, 1, &xTask);
@@ -236,6 +237,16 @@ while(1) {
 }
 }
 
+void mensagemUART(char msg[]){
+	 xSemaphoreTake(Potenciometro, portMAX_DELAY);
+	 UART_Send(LPC_UART0, (uint8_t *)msg, strlen(msg), BLOCKING);	
+	 xSemaphoreGive(Potenciometro);
+
+
+
+	
+}
+
 void recebeEnviaSerial(void *pvParameters){
 		const char * mensagem1 = "\n Botao 1 do rafa \r\n";
 		const char * mensagem2 = "\n O Rafael Zanella eh lindo \r\n";
@@ -244,14 +255,14 @@ void recebeEnviaSerial(void *pvParameters){
 		while(1){		
 			if(ulTaskNotifyTake(pdTRUE, 0)){
 				//if (xQueueReceive(xMessageQueue, mensagem, portMAX_DELAY) == pdPASS) {
-					UART_Send(LPC_UART0, (uint8_t *)mensagem1, strlen(mensagem1), BLOCKING);	
-					vTaskDelay(pdMS_TO_TICKS(200));
+				mensagemUART((char *)mensagem1);
+				vTaskDelay(pdMS_TO_TICKS(200));
 			//}          
 			} 
 			
 			if(xSemaphoreTake(xSemaphoreBotao2, 0) == pdPASS){
-					UART_Send(LPC_UART0, (uint8_t *)mensagem2, strlen(mensagem2), BLOCKING);
-					vTaskDelay(pdMS_TO_TICKS(200));					
+				mensagemUART((char *)mensagem2);
+				vTaskDelay(pdMS_TO_TICKS(200));					
 			}
 			vTaskDelay(pdMS_TO_TICKS(20));
 	}
@@ -260,9 +271,6 @@ void recebeEnviaSerial(void *pvParameters){
 void potenciometro(void *pvParameters){
 	 char buffer[20];
     while (1) {
-        // Obtém o mutex para acesso ao ADC
-         xSemaphoreTake(Potenciometro, 0);
-        
         // Lê o valor do potenciômetro
         uint16_t valor = leCanalAD(3);
         
@@ -271,12 +279,10 @@ void potenciometro(void *pvParameters){
         sprintf(buffer, "%u\r\n", valor);
         
         // Envia o valor via UART
-        UART_Send(LPC_UART0, (uint8_t *)buffer, strlen(buffer), BLOCKING);
+				mensagemUART((char *)buffer);
                 			
         // Aguarda um tempo antes de realizar a próxima leitura
         vTaskDelay(pdMS_TO_TICKS(10)); 
-			
-				xSemaphoreGive(Potenciometro);
     }
 }
 	
@@ -294,7 +300,7 @@ void vAssertCalled( const char *pcFile, uint32_t ulLine ){
 
 //================================================================================
 
-void vApplicationStackOverflowHook( xTaskHandle *pxTask, signed portCHAR *pcTaskName ){ 
+ void vApplicationStackOverflowHook( xTaskHandle *pxTask, signed portCHAR *pcTaskName ){ 
 
 		taskDISABLE_INTERRUPTS();
 		
