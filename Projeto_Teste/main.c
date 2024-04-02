@@ -292,7 +292,7 @@ void potenciometro(void *pvParameters){
 				mensagemUART((char *)buffer);
                 			
         // Aguarda um tempo antes de realizar a próxima leitura
-        vTaskDelay(pdMS_TO_TICKS(10)); 
+        vTaskDelay(pdMS_TO_TICKS(150)); 
     }
 }
 
