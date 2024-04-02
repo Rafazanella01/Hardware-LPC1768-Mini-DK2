@@ -375,7 +375,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>.\LibCMSIS;.\LibFreeRTOS;..\Projeto_Teste</IncludePath>
+              <IncludePath>.\LibCMSIS;.\LibFreeRTOS;..\Projeto_Teste;.\LibNetwork</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -443,6 +443,11 @@
               <FileName>CMSIS.lib</FileName>
               <FileType>4</FileType>
               <FilePath>.\LibCMSIS\CMSIS.lib</FilePath>
+            </File>
+            <File>
+              <FileName>Network.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>.\LibNetwork\Network.lib</FilePath>
             </File>
           </Files>
         </Group>

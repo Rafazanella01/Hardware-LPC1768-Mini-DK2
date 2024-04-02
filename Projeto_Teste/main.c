@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <task.h>
+#include "LibNetwork.h"
 
 #define TAMANHO 50
 
@@ -14,6 +15,12 @@ static TaskHandle_t xTask;
 static SemaphoreHandle_t mutexADC;
 
 static SemaphoreHandle_t Potenciometro;
+
+static uint8_t ip[4] = {192, 168, 53, 216};
+static uint8_t mask[4] = {255, 255, 255, 0};
+static uint8_t gateway[4] = {192, 168, 53, 254};
+static uint8_t dns[4] = {8, 8, 8, 8};
+uint8_t ucMACAddress[6] = {0X00, 0X18, 0X80, 0X01, 0X02, 0X03};
 
 //================================================================================
 //Protótipos de funções
@@ -40,6 +47,9 @@ uint16_t leCanalAD( unsigned char canal );
 void potenciometro(void *pvParameters);
 
 void mensagemUART(char msg[]);
+
+static void vUDPServer( void *pvParameters );
+
 //================================================================================
 
 int main( void ){
@@ -85,10 +95,6 @@ int main( void ){
 		pinsel.Pinnum= 3;
 		PINSEL_ConfigPin( &pinsel );    
 	
-	
-	
-	
-	
 		//configura P0.26 como AD0.3 (medição de tensão da bateria)
 		pinsel.Portnum= PINSEL_PORT_0;		    
 		pinsel.Pinmode= PINSEL_PINMODE_TRISTATE;	    
@@ -98,9 +104,6 @@ int main( void ){
 
 		//inicializa o conversor AD do LPC1768
 		ADC_Init( LPC_ADC, 100000 );
-		
-		
-		
 		
 		//==============================================             
 		
@@ -129,12 +132,20 @@ int main( void ){
 		xTaskCreate(recebeEnviaSerial, "recebeEnviaSerial", configMINIMAL_STACK_SIZE, NULL, 1, &xTask);
 		
 		xTaskCreate(potenciometro, "potenciometro", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+		
+		xTaskCreate(vUDPServer, "teste", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+		
+		FreeRTOS_IPInit( ip, mask, gateway, dns, ucMACAddress );
 
 		vTaskStartScheduler();
+		
 }
 //================================================================================
 
-uint16_t leCanalAD( unsigned char canal ){    
+void vApplicationIPNetworkEventHook( eIPCallbackEvent_t eNetworkEvent ){
+	}
+
+	uint16_t leCanalAD( unsigned char canal ){    
 	
 	uint16_t valorAD;
 
@@ -156,7 +167,6 @@ uint16_t leCanalAD( unsigned char canal ){
 	//desabilita o canal que foi habilitado para realizar a conversão
 	ADC_ChannelCmd( LPC_ADC, canal, DISABLE );
  
-	//
 	//delay_us( 10 );
 
 	//devolve o mutex para acesso ao ADC
@@ -284,6 +294,64 @@ void potenciometro(void *pvParameters){
         // Aguarda um tempo antes de realizar a próxima leitura
         vTaskDelay(pdMS_TO_TICKS(10)); 
     }
+}
+
+static void vUDPServer( void *pvParameters ){    
+    static const TickType_t 
+        xReceiveTimeOut = portMAX_DELAY;
+    struct freertos_sockaddr         
+        xBindAddress, xSourceAddress;
+    static uint8_t
+        udpServerRxBuffer[1024],
+        aesBuf[1024];
+    BaseType_t 
+        lBytesReceived;         
+   
+		Socket_t xListeningSocket;
+   
+    /* Cria o socket. */
+	
+		xListeningSocket = FreeRTOS_socket( FREERTOS_AF_INET, FREERTOS_SOCK_DGRAM, FREERTOS_IPPROTO_UDP );
+		
+	  
+    
+    //
+    FreeRTOS_setsockopt( xListeningSocket, 0, FREERTOS_SO_RCVTIMEO, &xReceiveTimeOut, sizeof(xReceiveTimeOut) );
+    
+    //    
+    xBindAddress.sin_port= FreeRTOS_htons( 5000 );
+    
+    /* Bind the socket to the port that the client RTOS task will send to. */
+    FreeRTOS_bind( xListeningSocket, &xBindAddress, sizeof( xBindAddress ) );   
+    
+    
+    for(;;){        
+        
+        //====================================================================        
+        
+        memset( aesBuf, 0, sizeof(aesBuf) );          
+        
+        lBytesReceived= FreeRTOS_recvfrom( xListeningSocket, aesBuf, sizeof(aesBuf), 0, &xSourceAddress, (socklen_t *)sizeof(xSourceAddress) );        
+                                
+            
+				//====================================================================
+				
+				if( strlen((char *)aesBuf) ){
+				
+						//====================================================================
+						
+						//                 
+						
+						/* Num teste alternando os comandos de abrir e fechar pista a cada 100ms,
+						não retorna mais desta função após processar alguns comandos. Provavelmente,
+						por não conseguir mais alocar memória para o envio, pois o timeout default do envio
+						é portMAX_DELAY. */
+						FreeRTOS_sendto( xListeningSocket, aesBuf, lBytesReceived, 0, &xSourceAddress, sizeof(xSourceAddress) );  
+
+				}               
+        
+    }
+    
 }
 	
 //================================================================================

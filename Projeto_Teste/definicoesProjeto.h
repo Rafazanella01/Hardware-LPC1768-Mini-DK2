@@ -32,14 +32,6 @@ extern uint8_t contactCycle;
 #define botao_2_BIT 12
 
 
-
-
-
-
-
-
-
-
 #define SDCARD_DETECT_PORT  1
 #define SDCARD_DETECT_BIT   25
 

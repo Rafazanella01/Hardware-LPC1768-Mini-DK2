@@ -22,7 +22,7 @@ Dialog DLL:      TARMP1.DLL V1.26.0.0
  
 <h2>Project:</h2>
 C:\Users\Imply\Desktop\Projeto\Hardware-LPC1768-Mini-DK2\Projeto_Teste\Teste.uvproj
-Project File Date:  03/21/2024
+Project File Date:  04/02/2024
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
@@ -30,13 +30,15 @@ Rebuild target 'Target 1'
 assembling startup_MPS_CM3.s...
 compiling system_LPC17xx.c...
 compiling main.c...
-main.c(194): warning:  #111-D: statement is unreachable
+main.c(204): warning:  #111-D: statement is unreachable
   					vTaskDelay(pdMS_TO_TICKS(200));
-main.c: 1 warning, 0 errors
+main.c(305): warning:  #177-D: variable "udpServerRxBuffer"  was declared but never referenced
+          udpServerRxBuffer[1024],
+main.c: 2 warnings, 0 errors
 linking...
-Program Size: Code=12736 RO-data=252 RW-data=148 ZI-data=35452  
-".\Objects\Teste.axf" - 0 Error(s), 1 Warning(s).
-Build Time Elapsed:  00:00:01
+Program Size: Code=29708 RO-data=344 RW-data=268 ZI-data=43372  
+".\Objects\Teste.axf" - 0 Error(s), 2 Warning(s).
+Build Time Elapsed:  00:00:00
 </pre>
 </body>
 </html>
